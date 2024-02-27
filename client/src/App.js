@@ -4,7 +4,7 @@ function App() {
   const [backendData, setBackendData] = useState([{}]);
 
   useEffect(() => {
-    fetch("/api")
+    fetch("/api/recipe/")
       .then((res) => res.json())
       .then((data) => {
         setBackendData(data);
