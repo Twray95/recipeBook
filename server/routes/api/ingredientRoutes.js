@@ -1,8 +1,7 @@
 const router = require("express").Router();
 
 router.get("/", (req, res) => {
-  console.log("API called");
-  res.json({ recipe: ["recipeOne", "recipeTwo", "recipeThree"] });
+  res.json({ message: "hit ingredient route" });
 });
 
 module.exports = router;
