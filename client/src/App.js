@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
 
 function App() {
-  const [backendData, setBackendData] = useState([{}]);
-
-  useEffect(() => {
-    fetch("/api/recipe/")
-      .then((res) => res.json())
-      .then((data) => {
-        setBackendData(data);
-      });
-  }, []);
-
   return (
     <div>
-      {typeof backendData.recipe === "undefined" ? (
-        <p>Loading recipes...</p>
-      ) : (
-        backendData.recipe.map((recipe) => <p>{recipe}</p>)
-      )}
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
