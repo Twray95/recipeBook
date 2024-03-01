@@ -1,11 +1,36 @@
 const router = require("express").Router();
 const { Recipe, Ingredient } = require("../../models/index");
 
-router.get("/", (req, res) => {
-  console.log("API called");
-  res.json({ recipe: ["recipeOne", "recipeTwo", "recipeThree"] });
+//get "all" recipes (only 5 recipes to display on front page)
+router.get("/", async (req, res) => {
+  try {
+    let recipes = await Recipe.findAll({
+      include: [Ingredient],
+    });
+    //Trim down to only five recipes
+    const fiveRecipes = recipes.slice(recipes.length - 5);
+    res.status(200).json(fiveRecipes);
+  } catch (err) {
+    res.status(400).send("Something went wrong with your request");
+  }
 });
 
+//get specific recipe
+router.get("/one/:id", async (req, res) => {
+  try {
+    //find single recipe and its ingredients
+    let recipeData = await Recipe.findOne({
+      where: { recipe_id: req.params.id },
+      include: [Ingredient],
+    });
+    let singleRecipe = recipeData.get({ plain: true });
+    res.status(200).json(singleRecipe);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+//create new recipe
 router.post("/", async (req, res) => {
   try {
     let newIngredients = req.body.ingredients;
@@ -25,6 +50,29 @@ router.post("/", async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(400).send("There was an error with your submission");
+  }
+});
+
+//Delete single recipe
+router.delete("/:id", async (req, res) => {
+  try {
+    //find the recipe to be deleted
+    let recipe = await Recipe.findOne({
+      where: { recipe_id: req.params.id },
+    });
+    //grab the data from the joined table so it can be removed
+    let ingredient = await recipe.getIngredients();
+    //removal the join information
+    recipe.removeIngredient(ingredient);
+    //now delete the recipe itself
+    await Recipe.destroy({
+      where: {
+        recipe_id: req.params.id,
+      },
+    });
+    res.status(200).send("Successfully deleted Recipe");
+  } catch (err) {
+    res.status(400).json(err);
   }
 });
 
