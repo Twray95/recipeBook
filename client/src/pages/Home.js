@@ -1,34 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Typography,
-  AppBar,
   Card,
   CardActions,
   CardContent,
   CardMedia,
   CssBaseline,
   Grid,
-  Toolbar,
   Container,
   Button,
 } from "@mui/material";
-import DinnerDiningIcon from "@mui/icons-material/DinnerDining";
 
 import allStyles from "../styles";
 
 //This will become a fetch request to get the recipe data, but for now just using placeholder.
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const Home = () => {
+  const [recipeData, setRecipeData] = useState([{}]);
+
+  useEffect(() => {
+    fetch("/api/recipe")
+      .then((response) => response.json())
+      .then((data) => {
+        setRecipeData(data);
+      });
+  }, []);
+  let cards = recipeData;
   return (
     <>
       <CssBaseline />
-      <AppBar position="relative">
-        <Toolbar>
-          <DinnerDiningIcon sx={allStyles.icon} />
-          <Typography variant="h6">Recipe Book</Typography>
-        </Toolbar>
-      </AppBar>
       <main>
         <div sx={allStyles.container}>
           <Container maxWidth="sm" sx={allStyles.container}>
@@ -72,7 +73,7 @@ const Home = () => {
         <Container sx={allStyles.cardGrid} maxWidth="md">
           <Grid container spacing={4}>
             {cards.map((card) => (
-              <Grid item key={card} xs={12} sm={6} md={4}>
+              <Grid item key={card.recipe_id} xs={12} sm={6} md={4}>
                 <Card sx={allStyles.card}>
                   <CardMedia
                     sx={allStyles.cardMedia}
@@ -81,20 +82,16 @@ const Home = () => {
                   ></CardMedia>
                   <CardContent sx={allStyles.cardContent}>
                     <Typography gutterBottom variant="h5">
-                      Recipe Title
+                      {card.title}
                     </Typography>
-                    <Typography>
-                      This section will show either a short description of the
-                      recipe or the start of the instructions
-                    </Typography>
+                    <Typography>{card.instructions}</Typography>
                   </CardContent>
                   <CardActions>
-                    <Button size="sm" color="primary">
-                      View
-                    </Button>
-                    <Button size="sm" color="primary">
-                      Edit
-                    </Button>
+                    <Link to="/recipe" state={{ from: `${card.recipe_id}` }}>
+                      <Button size="sm" color="primary">
+                        View or Edit
+                      </Button>
+                    </Link>
                   </CardActions>
                 </Card>
               </Grid>
@@ -102,19 +99,6 @@ const Home = () => {
           </Grid>
         </Container>
       </main>
-      <footer>
-        <Typography variant="h6" align="center" gutterBottom>
-          Recipe Book
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="textSecondary"
-          gutterBottom
-        >
-          Thank you for visiting this site.
-        </Typography>
-      </footer>
     </>
   );
 };
