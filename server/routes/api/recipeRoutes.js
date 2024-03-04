@@ -7,9 +7,8 @@ router.get("/", async (req, res) => {
     let recipes = await Recipe.findAll({
       include: [Ingredient],
     });
-    //Trim down to only five recipes
-    const fiveRecipes = recipes.slice(recipes.length - 5);
-    res.status(200).json(fiveRecipes);
+    console.log("=======HIT RECIPE ROUTE=======");
+    res.status(200).json(recipes);
   } catch (err) {
     res.status(400).send("Something went wrong with your request");
   }
@@ -23,8 +22,8 @@ router.get("/one/:id", async (req, res) => {
       where: { recipe_id: req.params.id },
       include: [Ingredient],
     });
-    let singleRecipe = recipeData.get({ plain: true });
-    res.status(200).json(singleRecipe);
+    console.log("=================== /api/recipe/one hit");
+    res.status(200).json(recipeData);
   } catch (err) {
     res.status(400).json(err);
   }

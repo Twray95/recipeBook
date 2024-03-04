@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Typography,
@@ -10,23 +10,44 @@ import {
   Grid,
   Container,
   Button,
+  Modal,
+  Box,
+  TextField,
 } from "@mui/material";
+
+import { useQuery } from "@tanstack/react-query";
 
 import allStyles from "../styles";
 
-//This will become a fetch request to get the recipe data, but for now just using placeholder.
-
 const Home = () => {
-  const [recipeData, setRecipeData] = useState([{}]);
+  //fetch request to get recipe data
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["allRecipes"],
+    queryFn: () =>
+      fetch("http://localhost:5001/api/recipe/").then((res) => res.json()),
+  });
 
-  useEffect(() => {
-    fetch("/api/recipe")
-      .then((response) => response.json())
-      .then((data) => {
-        setRecipeData(data);
-      });
-  }, []);
-  let cards = recipeData;
+  //search modal states
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [formState, setFormState] = useState({
+    searchField: "",
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const nextFormState = {
+      ...formState,
+      [name]: value,
+    };
+    setFormState(nextFormState);
+    console.log(formState);
+  };
+
+  //Handle what to show while fetch request is happening or errored
+  if (error) return <div>{error.message}</div>;
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <>
       <CssBaseline />
@@ -50,21 +71,69 @@ const Home = () => {
               <Grid container spacing={2} justifyContent="center">
                 <Grid item>
                   <Button
+                    onClick={handleOpen}
                     variant="contained"
                     color="primary"
                     sx={allStyles.buttons}
                   >
-                    See Recipes!
+                    Search Recipes
                   </Button>
+                  <Modal open={open} onClose={handleClose}>
+                    <Box sx={allStyles.modalSearch}>
+                      <Button color="primary">SEARCH</Button>
+                      <TextField
+                        id="outlined-basic"
+                        label="Search Recipes"
+                        name="searchField"
+                        onChange={handleChange}
+                        value={formState.searchField}
+                      />
+                    </Box>
+                  </Modal>
                 </Grid>
                 <Grid item>
                   <Button
-                    variant="outlined"
+                    onClick={handleOpen}
+                    variant="contained"
                     color="primary"
                     sx={allStyles.buttons}
                   >
-                    Add you own!
+                    Search by Ingredients
                   </Button>
+                  <Modal open={open} onClose={handleClose}>
+                    <Box sx={allStyles.modalSearch}>
+                      <Button color="primary">SEARCH</Button>
+                      <TextField
+                        id="outlined-basic"
+                        label="Search Recipes"
+                        name="searchField"
+                        onChange={handleChange}
+                        value={formState.searchField}
+                      />
+                    </Box>
+                  </Modal>
+                </Grid>
+                <Grid item>
+                  <Button
+                    onClick={handleOpen}
+                    variant="contained"
+                    color="primary"
+                    sx={allStyles.buttons}
+                  >
+                    Add Your Own Recipe!
+                  </Button>
+                  <Modal open={open} onClose={handleClose}>
+                    <Box sx={allStyles.modalSearch}>
+                      <Button color="primary">SEARCH</Button>
+                      <TextField
+                        id="outlined-basic"
+                        label="Search Recipes"
+                        name="searchField"
+                        onChange={handleChange}
+                        value={formState.searchField}
+                      />
+                    </Box>
+                  </Modal>
                 </Grid>
               </Grid>
             </div>
@@ -72,7 +141,7 @@ const Home = () => {
         </div>
         <Container sx={allStyles.cardGrid} maxWidth="md">
           <Grid container spacing={4}>
-            {cards.map((card) => (
+            {data.map((card) => (
               <Grid item key={card.recipe_id} xs={12} sm={6} md={4}>
                 <Card sx={allStyles.card}>
                   <CardMedia

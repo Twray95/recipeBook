@@ -27,6 +27,17 @@ const allStyles = {
     flexGrow: "1",
   },
   footer: {},
+  modalSearch: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    maxWidth: "100%",
+    bgcolor: "background.paper",
+    border: "2px solid primary",
+    boxShadow: 24,
+    p: 4,
+  },
 };
 
 export default allStyles;
