@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
+import { useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   Typography,
@@ -10,30 +12,22 @@ import {
   Grid,
   Container,
   Button,
-  Modal,
-  Box,
-  TextField,
 } from "@mui/material";
-
-import { useQuery } from "@tanstack/react-query";
-
 import allStyles from "../styles";
 
-const Home = () => {
-  //fetch request to get recipe data
+function ResultsPage() {
+  const location = useLocation();
+  const { searchName } = location.state;
+
   const { data, error, isLoading } = useQuery({
-    queryKey: ["allRecipes"],
+    queryKey: ["search"],
     queryFn: () =>
-      fetch("http://localhost:5001/api/recipe/").then((res) => res.json()),
+      fetch(`http://localhost:5001/api/recipe/search/${searchName}`).then(
+        (res) => res.json()
+      ),
   });
 
-  //modal states
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  //Handle what to show while fetch request is happening or errored
-  if (error) return <div>{error.message}</div>;
+  if (error) return <div>Error occurred while fetching data</div>;
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -49,32 +43,8 @@ const Home = () => {
               gutterBottom
               sx={allStyles.title}
             >
-              Recipe Book
+              Search Results:
             </Typography>
-            <Typography variant="h5" align="center" color="textSecondary">
-              Hello, thank you for visiting this website! You can use it to
-              search for and manage your own recipes.
-            </Typography>
-            <div>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Button
-                    onClick={handleOpen}
-                    variant="contained"
-                    color="primary"
-                    sx={allStyles.buttons}
-                  >
-                    Add Your Own Recipe!
-                  </Button>
-                  <Modal open={open} onClose={handleClose}>
-                    <Box sx={allStyles.modalSearch}>
-                      <Button color="primary">C</Button>
-                      <TextField id="outlined-basic" label="Search Recipes" />
-                    </Box>
-                  </Modal>
-                </Grid>
-              </Grid>
-            </div>
           </Container>
         </div>
         <Container sx={allStyles.cardGrid} maxWidth="md">
@@ -108,6 +78,6 @@ const Home = () => {
       </main>
     </>
   );
-};
+}
 
-export default Home;
+export default ResultsPage;

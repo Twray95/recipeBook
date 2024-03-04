@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { Recipe, Ingredient } = require("../../models/index");
+const { Op } = require("sequelize");
 
 //get "all" recipes (only 5 recipes to display on front page)
 router.get("/", async (req, res) => {
@@ -7,8 +8,9 @@ router.get("/", async (req, res) => {
     let recipes = await Recipe.findAll({
       include: [Ingredient],
     });
-    console.log("=======HIT RECIPE ROUTE=======");
-    res.status(200).json(recipes);
+    //Trim down to only five recipes
+    const sixRecipes = recipes.slice(recipes.length - 6);
+    res.status(200).json(sixRecipes);
   } catch (err) {
     res.status(400).send("Something went wrong with your request");
   }
@@ -24,6 +26,26 @@ router.get("/one/:id", async (req, res) => {
     });
     console.log("=================== /api/recipe/one hit");
     res.status(200).json(recipeData);
+  } catch (err) {
+    res.status(400).json(err);
+  }
+});
+
+//Find recipes that contain the search name in their title
+router.get("/search/:name", async (req, res) => {
+  try {
+    let searchResults = await Recipe.findAll({
+      where: {
+        title: {
+          [Op.substring]: `${req.params.name}`,
+        },
+      },
+    });
+    if (!searchResults) {
+      res.status(404).send("No results found!");
+    } else {
+      res.status(200).json(searchResults);
+    }
   } catch (err) {
     res.status(400).json(err);
   }
