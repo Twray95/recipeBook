@@ -32,6 +32,53 @@ const Home = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [formState, setFormState] = useState({
+    title: "",
+    instructions: "",
+    ingredientActive: "",
+    ingredientList: [],
+    ingredients: [],
+  });
+
+  //update form state whenever a field changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const nextFormState = {
+      ...formState,
+      [name]: value,
+    };
+    setFormState(nextFormState);
+  };
+  //Handle add Ingredient
+  const handlePush = () => {
+    //Push a new item into the two ingredient arrays.  The first one is for submitting to the database and the second one is for displaying in the UI
+    const newIngredient = { name: `${formState.ingredientActive}` };
+    const newIngredientItem = `${formState.ingredientActive} `;
+    formState.ingredientList.push(newIngredientItem);
+    formState.ingredients.push(newIngredient);
+    console.log(formState.ingredients);
+    //Reset the input fields after adding an item
+    setFormState({ ...formState, ingredientActive: "" });
+  };
+  //Handle submission of new recipe
+  const handleSubmit = async () => {
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...formState }),
+    };
+    fetch("http://localhost:5001/api/recipe/", requestOptions);
+
+    //Reset the form state after submission
+    setFormState({
+      title: "",
+      instructions: "",
+      ingredientActive: "",
+      ingredientList: [],
+      ingredients: [],
+    });
+  };
+
   //Handle what to show while fetch request is happening or errored
   if (error) return <div>{error.message}</div>;
   if (isLoading) return <div>Loading...</div>;
@@ -68,8 +115,49 @@ const Home = () => {
                   </Button>
                   <Modal open={open} onClose={handleClose}>
                     <Box sx={allStyles.modalSearch}>
-                      <Button color="primary">C</Button>
-                      <TextField id="outlined-basic" label="Search Recipes" />
+                      <Typography variant="h5" align="start" gutterBottom>
+                        Title:
+                      </Typography>
+                      <TextField
+                        id="outlined-basic"
+                        label="Title"
+                        onChange={handleChange}
+                        name="title"
+                        value={formState.title}
+                      />
+                      <Typography variant="h5" align="start" gutterBottom>
+                        Instructions:
+                      </Typography>
+                      <TextField
+                        id="outlined-basic"
+                        label="Instructions"
+                        multiline
+                        sx={{ display: "flex" }}
+                        onChange={handleChange}
+                        name="instructions"
+                        value={formState.instructions}
+                      ></TextField>
+                      <Typography variant="h5" align="start" gutterBottom>
+                        Ingredients:
+                      </Typography>
+                      <Box>
+                        <Typography variant="h7">
+                          {formState.ingredientList}
+                        </Typography>
+                      </Box>
+                      <Button onClick={handlePush}>Add</Button>
+                      <TextField
+                        id="outlined-basic"
+                        label="Ingredient"
+                        onChange={handleChange}
+                        name="ingredientActive"
+                        value={formState.ingredientActive}
+                      />
+                      <Box align="center">
+                        <Button variant="primary" onClick={handleSubmit}>
+                          Submit
+                        </Button>
+                      </Box>
                     </Box>
                   </Modal>
                 </Grid>
