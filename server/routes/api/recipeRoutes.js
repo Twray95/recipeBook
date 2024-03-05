@@ -40,6 +40,7 @@ router.get("/search/:name", async (req, res) => {
           [Op.substring]: `${req.params.name}`,
         },
       },
+      include: [Ingredient],
     });
     if (!searchResults) {
       res.status(404).send("No results found!");
